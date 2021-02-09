@@ -1,0 +1,15 @@
+# SystemD service definition.
+
+[Unit]
+Description = ZeroIoT monitoring server
+After = network.target
+
+[Service]
+Restart = always
+Environment = FLASK_CONFIG=production
+User = <your user>
+WorkingDirectory = /path/to/project/zeroiot
+ExecStart = /path/to/project/zeroiot/venv/bin/gunicorn --bind 127.0.0.1:3000 -w 2 app.main:app
+
+[Install]
+WantedBy = multi-user.target

@@ -1,0 +1,10 @@
+[DATABASE]
+SQLITE_DB = iot.db
+INSOLATIONS_RRD_DB = rrdtool/insolations.rrd
+
+[TIME]
+TIMEZONE = Europe/Warsaw
+
+[GEO]
+LATITUDE = 49.821437N
+LONGITUDE = 19.051775E
