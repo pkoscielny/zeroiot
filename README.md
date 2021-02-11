@@ -1,12 +1,17 @@
-# ZeroIoT monitoring - version light.
+# Zero IoT monitoring
 
-This is monitoring system for IoT projects.
-First layer contains IoT application server based on Flask and SQLite database which stores data come from external sensors.
+This is monitoring system for air parameters and activity of the sun in.
+The main goal is to run this software on Raspberry Pi Zero or similar small computer with small amount of hardware and low power consumption.
+
+First layer contains IoT RESTful server based on Flask and SQLite database which stores data come from external sensors.
 Second layer is set of scripts for converting data from SQLite database to RRDTool databases and generate set of time based graphs.
-These graphs are show in third layer on html site served by lighttpd server.
-All of this bunch of software can be run on some small computer like Raspberry Pi Zero W with small amount of hardware resources.
+These graphs are shown in third layer on html site served by lighttpd server.
+
+If you have more powerful computer you can use Grafana or similar software to show nice graphs with some metrics.
+Below I descbided how to install this on Raspberry OS system.
 
 ## Requirements:
+- Raspberry OS 
 - SQLite
 - RRDTool
 - Sunwait
@@ -17,7 +22,7 @@ All of this bunch of software can be run on some small computer like Raspberry P
 - lightweight HTTP server for serving static files like graphs with IoT metrics, e.g. Lighttpd.
 - RRDTool for storing time based series of IoT data and generating graphs mentioned above.
 
-## What do you need to run on your Raspbian:
+## What do you need to run on your Raspberry OS:
 
 ### Sunwait installation:
 ```
@@ -42,10 +47,16 @@ Open `/etc/lighttpd/lighttpd.conf` with root rights and set absolute path to rrd
 sudo systemctl restart lighttpd
 sudo systemctl status lighttpd
 ```
+
+Set up configuration file and change some configurations as you want:
+```
+cp configs/config.ini_example configs/config.ini 
+```
   
-Here you can run zeroiot step by step or run it in Docker container (please see comments in configs/Dockerfile)
+You can run zeroiot step by step or run it in Docker container (please see comments in configs/Dockerfile)
 Step by step version:
 ```
+sudo apt install python3-venv
 python3 -m venv ./venv
 source venv/bin/activate
 pip install -r configs/requirements.txt
@@ -63,15 +74,23 @@ sudo systemctl status zeroiot
 sudo systemctl enable zeroiot
 ```
 
-By default Gunicorn has turned off logging and it is expected for me on production (Raspberry Pi SD card)
+By default Gunicorn has turned off logging and it is what I expected for on production environment (Raspberry Pi SD card).
 You can observe logs from this service here:
-`sudo journalctl -u zeroiot.service`
+```
+sudo journalctl -u zeroiot.service
+```
 
-Add script for generating graphs to crontab:
-`*/5 * * * * bash -c 'cd /path/to/your/zeroiot && ./venv/bin/python tools/generate_graphs.py > /dev/null'`
+Try run scripts for updating RRD databases and generating graphs:
+```
+./venv/bin/python tools/update_rrd_db.py 
+./venv/bin/python tools/generate_rrd_graphs.py  
+```
 
-For debugging you can send output to file, e.g: `bash -c '.... > /tmp/iot.log 2>&1'` and observe this:
-`watch -n1 cat /tmp/iot.log`
+If the scripts work fine add these to crontab:
+`*/5 * * * * bash -c 'cd /path/to/your/zeroiot && ./venv/bin/python tools/update_rrd_db.py > /dev/null && ./venv/bin/python tools/generate_rrd_graphs.py > /dev/null'`
+
+For debugging you can send output to file, e.g: `bash -c '.... > /tmp/zeroiot.log 2>&1'` and observe this:
+`watch -n1 cat /tmp/zeroiot.log`
 
 Add some data using zeroiot. For testing you can add some mocked data into crontab:
 ```
