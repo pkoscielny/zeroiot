@@ -6,6 +6,7 @@ from dateutil.parser import parse as dt_parse
 from configparser import ConfigParser
 from sqlite3 import Error as SqlError, connect as sql_connect
 
+#TODO: refactoring.
 
 '''
  Configuration.

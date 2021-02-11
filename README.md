@@ -1,6 +1,6 @@
 # Zero IoT monitoring
 
-This is monitoring system for air parameters and activity of the sun in.
+This is monitoring system for air parameters (like temperature or humidity) and activity of the sun.
 The main goal is to run this software on Raspberry Pi Zero or similar small computer with small amount of hardware and low power consumption.
 
 First layer contains IoT RESTful server based on Flask and SQLite database which stores data come from external sensors.
@@ -35,7 +35,7 @@ sudo mv sunwait /usr/bin/
 ### Install and setup required packages:
 ```
 sudo apt install lighttpd
-sudo apt install rrdtool librrd-dev
+sudo apt install rrdtool librrd-dev python3-dev
 git clone https://github.com/pkoscielny/zeroiot
 cd zeroiot
 sudo cp /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf_bak
@@ -60,11 +60,18 @@ sudo apt install python3-venv
 python3 -m venv ./venv
 source venv/bin/activate
 pip install -r configs/requirements.txt
-./venv/bin/gunicorn --bind 127.0.0.1:3000 -w 2 app.main:app
+./venv/bin/gunicorn --bind :3000 -w 1 app.main:app
+```
+
+Check if Gunicorn works properly:
+```
+curl http://localhost:3000/air_state
 ```
 
 If works then add this server to systemd as a service:
-`sudo cp configs/zeroiot.service /etc/systemd/system/`
+```
+sudo cp configs/zeroiot.service /etc/systemd/system/ 
+```
 
 Set correct paths in /etc/systemd/system/zeroiot.service and run:
 ```
@@ -86,11 +93,15 @@ Try run scripts for updating RRD databases and generating graphs:
 ./venv/bin/python tools/generate_rrd_graphs.py  
 ```
 
-If the scripts work fine add these to crontab:
-`*/5 * * * * bash -c 'cd /path/to/your/zeroiot && ./venv/bin/python tools/update_rrd_db.py > /dev/null && ./venv/bin/python tools/generate_rrd_graphs.py > /dev/null'`
+If these work fine with no errors add these to crontab:
+```
+*/5 * * * * bash -c 'cd /path/to/your/zeroiot && ./venv/bin/python tools/update_rrd_db.py > /dev/null && ./venv/bin/python tools/generate_rrd_graphs.py > /dev/null'
+```
 
 For debugging you can send output to file, e.g: `bash -c '.... > /tmp/zeroiot.log 2>&1'` and observe this:
-`watch -n1 cat /tmp/zeroiot.log`
+```
+watch -n1 cat /tmp/zeroiot.log
+```
 
 Add some data using zeroiot. For testing you can add some mocked data into crontab:
 ```
@@ -103,4 +114,4 @@ Add some data using zeroiot. For testing you can add some mocked data into cront
 
 After 5 minutes you should see new files in rrdtool dir and everything on site http://localhost.
 
-
+Enjoy!
