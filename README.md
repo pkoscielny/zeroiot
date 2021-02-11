@@ -93,11 +93,15 @@ Try run scripts for updating RRD databases and generating graphs:
 ./venv/bin/python tools/generate_rrd_graphs.py  
 ```
 
-If the scripts work fine add these to crontab:
-`*/5 * * * * bash -c 'cd /path/to/your/zeroiot && ./venv/bin/python tools/update_rrd_db.py > /dev/null && ./venv/bin/python tools/generate_rrd_graphs.py > /dev/null'`
+If these work fine with no errors add these to crontab:
+```
+*/5 * * * * bash -c 'cd /path/to/your/zeroiot && ./venv/bin/python tools/update_rrd_db.py > /dev/null && ./venv/bin/python tools/generate_rrd_graphs.py > /dev/null'
+```
 
 For debugging you can send output to file, e.g: `bash -c '.... > /tmp/zeroiot.log 2>&1'` and observe this:
-`watch -n1 cat /tmp/zeroiot.log`
+```
+watch -n1 cat /tmp/zeroiot.log
+```
 
 Add some data using zeroiot. For testing you can add some mocked data into crontab:
 ```
@@ -110,4 +114,4 @@ Add some data using zeroiot. For testing you can add some mocked data into cront
 
 After 5 minutes you should see new files in rrdtool dir and everything on site http://localhost.
 
-
+Enjoy!
