@@ -1,9 +1,11 @@
 import re
 import rrdtool
 import sqlite3
-from os import popen, getenv
+from os import path, popen, getenv
 from configparser import ConfigParser
 
+#TODO: refactoring.
+#TODO: change 1 year time range in first SQL to better value.
 
 '''
  Configuration.
@@ -65,27 +67,30 @@ time_map = {
     '1m': 'month',
     '1y': 'year',
 }
-print("Generating insolation graphs")
-for time in periods:
-    rrdtool.graph(
-        f'rrdtool/insolations_{time}.png',
-        '--start', f'-{time}', '--end', 'now',
-        '--full-size-mode', '--slope-mode', '--width=700', '--height=400',
-        '--vertical-label=Ins', f'--title=Insolation diagram - last {time_map[time]}',
-        '--color=SHADEB#8899CC', '--watermark=IoT - insolation',
-        '--font=LEGEND:8:Courier New',
-        f"DEF:insolation={insolations_rrd_db}:ins:AVERAGE",
-        f'CDEF:nightpos=LTIME,86400,%,{sunrise_sec},LT,INF,LTIME,86400,%,{sunset_sec},GT,INF,UNKN,insolation,+,IF,IF',
-        'AREA:nightpos#CCCCCC',
-        'COMMENT:Sunrise\: '+ sunrise_time.replace(':','\:') +'\l',
-        'COMMENT:Sunset\:  '+ sunset_time.replace(':','\:') +'\l',
-        'COMMENT:               Last   Avg   Min   Max\l',
-        'AREA:insolation#1598C3:insolation',
-        'GPRINT:insolation:LAST:%4.0lf',
-        'GPRINT:insolation:AVERAGE:%4.0lf',
-        'GPRINT:insolation:MIN:%4.0lf',
-        'GPRINT:insolation:MAX:%4.0lf\l',
-    )
+if path.exists(insolations_rrd_db):
+    print("Generating insolation graphs")
+    for time in periods:
+        rrdtool.graph(
+            f'rrdtool/insolations_{time}.png',
+            '--start', f'-{time}', '--end', 'now',
+            '--full-size-mode', '--slope-mode', '--width=700', '--height=400',
+            '--vertical-label=Ins', f'--title=Insolation diagram - last {time_map[time]}',
+            '--color=SHADEB#8899CC', '--watermark=IoT - insolation',
+            '--font=LEGEND:8:Courier New',
+            f"DEF:insolation={insolations_rrd_db}:ins:AVERAGE",
+            f'CDEF:nightpos=LTIME,86400,%,{sunrise_sec},LT,INF,LTIME,86400,%,{sunset_sec},GT,INF,UNKN,insolation,+,IF,IF',
+            'AREA:nightpos#CCCCCC',
+            'COMMENT:Sunrise\: '+ sunrise_time.replace(':','\:') +'\l',
+            'COMMENT:Sunset\:  '+ sunset_time.replace(':','\:') +'\l',
+            'COMMENT:               Last   Avg   Min   Max\l',
+            'AREA:insolation#1598C3:insolation',
+            'GPRINT:insolation:LAST:%4.0lf',
+            'GPRINT:insolation:AVERAGE:%4.0lf',
+            'GPRINT:insolation:MIN:%4.0lf',
+            'GPRINT:insolation:MAX:%4.0lf\l',
+        )
+else:
+    print(f"File {insolations_rrd_db} doesn't exist. Skipping...")
 
 # Small explanations of nightpos variable:
 # f'CDEF:nightpos=LTIME,86400,%,{sunrise_sec},LT,INF,LTIME,86400,%,{sunset_sec},GT,INF,UNKN,insolation,+,IF,IF',
@@ -184,6 +189,9 @@ for metric in air_state_metrics:
         print("\tlocation: ", location)
 
         db_name = f"rrdtool/air_states_{location}.rrd"
+        if not path.exists(db_name):
+            print(f"File {db_name} doesn't exist. Skipping...")
+            continue
 
         metric_name = f'{metrics_map[metric]}_{location}'
         full_metric = f'{metric}_{location}'

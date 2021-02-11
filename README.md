@@ -1,6 +1,6 @@
 # Zero IoT monitoring
 
-This is monitoring system for air parameters and activity of the sun in.
+This is monitoring system for air parameters (like temperature or humidity) and activity of the sun.
 The main goal is to run this software on Raspberry Pi Zero or similar small computer with small amount of hardware and low power consumption.
 
 First layer contains IoT RESTful server based on Flask and SQLite database which stores data come from external sensors.
@@ -35,7 +35,7 @@ sudo mv sunwait /usr/bin/
 ### Install and setup required packages:
 ```
 sudo apt install lighttpd
-sudo apt install rrdtool librrd-dev
+sudo apt install rrdtool librrd-dev python3-dev
 git clone https://github.com/pkoscielny/zeroiot
 cd zeroiot
 sudo cp /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf_bak
@@ -60,11 +60,18 @@ sudo apt install python3-venv
 python3 -m venv ./venv
 source venv/bin/activate
 pip install -r configs/requirements.txt
-./venv/bin/gunicorn --bind 127.0.0.1:3000 -w 2 app.main:app
+./venv/bin/gunicorn --bind :3000 -w 1 app.main:app
+```
+
+Check if Gunicorn works properly:
+```
+curl http://localhost:3000/air_state
 ```
 
 If works then add this server to systemd as a service:
-`sudo cp configs/zeroiot.service /etc/systemd/system/`
+```
+sudo cp configs/zeroiot.service /etc/systemd/system/ 
+```
 
 Set correct paths in /etc/systemd/system/zeroiot.service and run:
 ```
