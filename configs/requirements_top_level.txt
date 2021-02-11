@@ -1,0 +1,9 @@
+## pip install -r configs/requirements_top_level.txt --upgrade
+## pip freeze -r configs/requirements_top_level.txt > configs/requirements.txt
+Flask==1.1.2
+Flask-RESTful==0.3.8
+Flask-SQLAlchemy==2.4.4
+gunicorn==20.0.4
+pytest==6.2.2
+python-dateutil==2.8.1
+rrdtool==0.1.15
