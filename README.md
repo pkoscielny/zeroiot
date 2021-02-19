@@ -34,6 +34,7 @@ sudo mv sunwait /usr/bin/
 
 ### Install and setup required packages:
 ```
+sudo apt install sqlite3
 sudo apt install lighttpd
 sudo apt install rrdtool librrd-dev python3-dev
 git clone https://github.com/pkoscielny/zeroiot
@@ -115,3 +116,17 @@ Add some data using zeroiot. For testing you can add some mocked data into cront
 After 5 minutes you should see new files in rrdtool dir and everything on site http://localhost.
 
 Enjoy!
+
+If you want completely remove the data from your ZeroIoT system you can do it in this way:
+```
+cd path/to/your/zeroiot
+sudo systemctl stop zeroiot.service
+rm iot.db
+rm rrdtool/*.rrd
+sudo systemctl start zeroiot.service
+```
+
+Run server in dev mode:
+```
+FLASK_APP="app:create_app('dev')" FLASK_ENV="development" ./venv/bin/python -m flask run --port=3000
+```

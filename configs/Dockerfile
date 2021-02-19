@@ -3,7 +3,10 @@ FROM tiangolo/meinheld-gunicorn-flask:python3.6-alpine3.8
 RUN apk update && apk add sqlite
 COPY ./ /app
 WORKDIR /app
-RUN pip install --upgrade pip && pip install -r configs/requirements.txt
+
+# Install only modules required to proper work ZeroIoT server.
+RUN sed -i 's/.*rrdtool.*//' configs/requirements_top_level.txt
+RUN pip install --upgrade pip && pip install -r configs/requirements_top_level.txt
 
 # By default is prod.
 ENV FLASK_ENV = 'prod'
