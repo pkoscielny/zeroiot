@@ -130,3 +130,7 @@ Run server in dev mode:
 ```
 FLASK_APP="app:create_app('dev')" FLASK_ENV="development" ./venv/bin/python -m flask run --port=3000
 ```
+
+## TODO
+* describe allowed endpoints
+* describe metrics

@@ -1,8 +1,11 @@
 from configparser import ConfigParser
 
-config = ConfigParser()
-config.read('configs/config.ini')
-sqlite_db = config['DATABASE']['SQLITE_DB']
+#TODO: handle lack of ini file and lack of given key in config_ini.
+#TODO: add os.getenv('SQLITE_DB', 'iot.db') and others.
+
+config_ini = ConfigParser()
+config_ini.read('configs/config.ini')
+sqlite_db = config_ini['DATABASE']['SQLITE_DB']
 
 
 class BaseConfig:
