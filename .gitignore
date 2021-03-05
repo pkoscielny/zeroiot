@@ -6,3 +6,4 @@ iot.db
 configs/config.ini
 rrdtool/*.rrd
 rrdtool/*.png
+.coverage

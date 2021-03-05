@@ -6,12 +6,15 @@ marshmallow-jsonapi==0.24.0
 Flask-SQLAlchemy==2.4.4
 gunicorn==20.0.4
 pytest==6.2.2
+pytest-cov==2.11.1
 python-dateutil==2.8.1
 rrdtool==0.1.15
+smart-data==0.1.2
 ## The following requirements were added by pip freeze:
 aniso8601==8.1.1
 attrs==20.3.0
 click==7.1.2
+coverage==5.4
 Flask-RESTful==0.3.8
 importlib-metadata==3.4.0
 iniconfig==1.1.1
