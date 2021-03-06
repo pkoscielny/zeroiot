@@ -1,7 +1,9 @@
+import pytest
+from smart_data import include
+from re import compile as re_compile
 
-#TODO: add more tests for list
-#TODO: implement function to compare structures deeply like eq_or_diff in Perl.
-#TODO: add tests for GET/PUT/DELETE.
+re_datetime = re_compile(r"^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$")
+
 
 class TestList:
     def test_empty_list(self, client):
@@ -11,46 +13,48 @@ class TestList:
             assert b'[]' in res.data
 
     def test_simple_list(self, client):
+        air_state_1 = {
+            'type': 'air_state',
+            'attributes': {
+                'temperature': '21.1',
+                'humidity': '51.1',
+                'location': 'kitchen',
+                'device': 'dev1_esp',
+            },
+        }
+
+        air_state_2 = {
+            'type': 'air_state',
+            'attributes': {
+                'temperature': '22.2',
+                'humidity': '52.2',
+                'location': 'bathroom',
+                'device': 'dev2_esp',
+            },
+        }
+
         with client:
             client.post(
                 '/air_state',
-                json={
-                    'data': {
-                        'type': 'air_state',
-                        'attributes': {
-                            'temperature': 21.1,
-                            'humidity': 51.1,
-                            'location': 'kitchen',
-                            'device': 'dev1_esp',
-                        },
-                    },
-                },
+                json={'data': air_state_1},
                 content_type='application/vnd.api+json',
             )
 
             client.post(
                 '/air_state',
-                json={
-                    'data': {
-                        'type': 'air_state',
-                        'attributes': {
-                            'temperature': 22.2,
-                            'humidity': 52.2,
-                            'location': 'bathroom',
-                            'device': 'dev2_esp',
-                        },
-                    },
-                },
-                content_type = 'application/vnd.api+json',
+                json={'data': air_state_2},
+                content_type='application/vnd.api+json',
             )
 
             res = client.get('/air_state')
             assert 200 == res.status_code
+
             res_json = res.get_json()
-            assert res_json['data'][0]['id'] == '1'
-            assert res_json['data'][1]['id'] == '2'
-            assert res_json['data'][0]['attributes']['temperature'] == '21.1'
-            assert res_json['data'][1]['attributes']['temperature'] == '22.2'
+            air_state_1['id'] = '1'
+            air_state_2['id'] = '2'
+            air_state_1['attributes']['created'] = re_datetime
+            air_state_2['attributes']['created'] = re_datetime
+            assert include(res_json['data'], [air_state_1, air_state_2]) == []
 
 
 class TestAdd:
@@ -58,7 +62,7 @@ class TestAdd:
         with client:
             res = client.post(
                 '/air_state',
-                json = {
+                json={
                     'data': {
                         'type': 'air_state',
                         'attributes': {
@@ -68,18 +72,28 @@ class TestAdd:
                         },
                     },
                 },
-                content_type = 'application/vnd.api+json',
+                content_type='application/vnd.api+json',
             )
             assert 422 == res.status_code
+
             res_json = res.get_json()
-            assert res_json['errors'][0]['detail'] == 'Missing data for required field.'
-            assert res_json['errors'][0]['source']['pointer'] == '/data/attributes/temperature'
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Missing data for required field.",
+                        'source': {
+                            'pointer': "/data/attributes/temperature",
+                        },
+                    },
+                ]
+            ) == []
 
     def test_required_param_humidity(self, client):
         with client:
             res = client.post(
                 '/air_state',
-                json = {
+                json={
                     'data': {
                         'type': 'air_state',
                         'attributes': {
@@ -89,18 +103,28 @@ class TestAdd:
                         },
                     },
                 },
-                content_type = 'application/vnd.api+json',
+                content_type='application/vnd.api+json',
             )
             assert 422 == res.status_code
+
             res_json = res.get_json()
-            assert res_json['errors'][0]['detail'] == 'Missing data for required field.'
-            assert res_json['errors'][0]['source']['pointer'] == '/data/attributes/humidity'
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Missing data for required field.",
+                        'source': {
+                            'pointer': "/data/attributes/humidity",
+                        },
+                    },
+                ]
+            ) == []
 
     def test_required_param_location(self, client):
         with client:
             res = client.post(
                 '/air_state',
-                json = {
+                json={
                     'data': {
                         'type': 'air_state',
                         'attributes': {
@@ -110,18 +134,28 @@ class TestAdd:
                         },
                     },
                 },
-                content_type = 'application/vnd.api+json',
+                content_type='application/vnd.api+json',
             )
             assert 422 == res.status_code
+
             res_json = res.get_json()
-            assert res_json['errors'][0]['detail'] == 'Missing data for required field.'
-            assert res_json['errors'][0]['source']['pointer'] == '/data/attributes/location'
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Missing data for required field.",
+                        'source': {
+                            'pointer': "/data/attributes/location",
+                        },
+                    },
+                ]
+            ) == []
 
     def test_required_param_device(self, client):
         with client:
             res = client.post(
                 '/air_state',
-                json = {
+                json={
                     'data': {
                         'type': 'air_state',
                         'attributes': {
@@ -131,56 +165,254 @@ class TestAdd:
                         },
                     },
                 },
-                content_type = 'application/vnd.api+json',
+                content_type='application/vnd.api+json',
             )
             assert 422 == res.status_code
+
             res_json = res.get_json()
-            assert res_json['errors'][0]['detail'] == 'Missing data for required field.'
-            assert res_json['errors'][0]['source']['pointer'] == '/data/attributes/device'
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Missing data for required field.",
+                        'source': {
+                            'pointer': "/data/attributes/device",
+                        },
+                    },
+                ]
+            ) == []
 
     def test_json_structure(self, client):
         with client:
             res = client.post(
                 '/air_state',
-                json = {},
-                content_type = 'application/vnd.api+json',
+                json={},
+                content_type='application/vnd.api+json',
             )
             assert 422 == res.status_code
 
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Object must include `data` key.",
+                        'source': {
+                            'pointer': "/",
+                        },
+                    },
+                ]
+            ) == []
+
     def test_add_new(self, client):
+        air_state_1 = {
+            'type': 'air_state',
+            'attributes': {
+                'temperature': '20.1',
+                'humidity': '51.2',
+                'location': 'kitchen',
+                'device': 'dev1_esp',
+            },
+        }
+
         with client:
             res = client.post(
                 '/air_state',
-                json = {
-                    'data': {
-                        'type': 'air_state',
-                        'attributes': {
-                            'temperature': 20.1,
-                            'humidity': 51.2,
-                            'location': 'kitchen',
-                            'device': 'dev1_esp',
-                        },
-                    },
-                },
-                content_type = 'application/vnd.api+json',
+                json={'data': air_state_1},
+                content_type='application/vnd.api+json',
             )
             assert 201 == res.status_code
-            res_json = res.get_json()
-            assert res_json['data']['type'] == 'air_state'
-            assert res_json['data']['id'] == '1'
-            assert res_json['data']['attributes']['temperature'] == '20.1'
-            assert res_json['data']['attributes']['humidity'] == '51.2'
-            assert res_json['data']['attributes']['location'] == 'kitchen'
-            assert res_json['data']['attributes']['device'] == 'dev1_esp'
-            assert 'created' in res_json['data']['attributes'].keys()
 
-            res = client.get('/air_state')
-            assert 200 == res.status_code
             res_json = res.get_json()
-            assert res_json['data'][0]['id'] == '1'
-            assert res_json['data'][0]['attributes']['temperature'] == '20.1'
-            assert res_json['data'][0]['attributes']['humidity'] == '51.2'
-            assert res_json['data'][0]['attributes']['location'] == 'kitchen'
-            assert res_json['data'][0]['attributes']['device'] == 'dev1_esp'
-            assert 'created' in res_json['data'][0]['attributes'].keys()
-            assert len(res_json['data']) == 1
+            air_state_1['id'] = '1'
+            air_state_1['attributes']['created'] = re_datetime
+            assert include(res_json['data'], air_state_1) == []
+
+            res = client.get('/air_state/1')
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], air_state_1) == []
+
+
+@pytest.mark.usefixtures("add_air_state")
+class TestDelete:
+    def test_delete(self, client):
+        with client:
+            res = client.delete(
+                '/air_state/1',
+                content_type='application/vnd.api+json',
+            )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert res_json['meta']['message'] == "Object successfully deleted"
+
+    def test_not_found(self, client):
+        with client:
+            res = client.delete(
+                '/air_state/2',
+                content_type='application/vnd.api+json',
+            )
+            assert 404 == res.status_code
+
+
+@pytest.mark.usefixtures("add_air_state")
+class TestUpdate:
+    def test_wrong_type_temperature(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': "abc",
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid number.",
+                        'source': {
+                            'pointer': "/data/attributes/temperature",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_type_humidity(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'humidity': "abc",
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid number.",
+                        'source': {
+                            'pointer': "/data/attributes/humidity",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_type_location(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'location': 42,
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/location",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_type_device(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'device': 42,
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/device",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_update_temperature_and_humidity(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': "23.3",
+                'humidity': "33.3",
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], air_state) == []
+
+    def test_full_update(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': "10.2",
+                'humidity': "67.8",
+                'location': 'bathroom_2',
+                'device': 'dev5_esp',
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], air_state) == []

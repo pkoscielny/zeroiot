@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class AuditMixin(object):
     created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 

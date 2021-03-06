@@ -9,7 +9,8 @@ class SchemaAirState(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'air_state_list'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    # id = fields.Integer(as_string=True, dump_only=True) # make troubles during update.
+    id = fields.Integer(as_string=True, required=False, missing=None, allow_none=True)
     temperature = fields.Decimal(required=True)
     humidity = fields.Decimal(required=True)
     location = fields.Str(required=True)
@@ -24,7 +25,8 @@ class SchemaInsolation(Schema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'insolation_list'
 
-    id = fields.Integer(as_string=True, dump_only=True)
+    # id = fields.Integer(as_string=True, dump_only=True) # make troubles during update.
+    id = fields.Integer(as_string=True, required=False, missing=None, allow_none=True)
     insolation = fields.Integer(required=True)
     device = fields.Str(required=True)
     created = fields.DateTime(format="%Y-%m-%d %H:%M:%S")
