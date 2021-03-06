@@ -71,7 +71,7 @@ air_states = dict() # many sensors (each location has its own sensor).
 insolations = list() # only one sensor.
 
 for item in db_air_states:
-    location = re_sub('(\s+)', '_', item[2].strip())
+    location = re_sub(r"(\s+)", "_", item[2].strip())
     if location not in air_states:
         air_states[location] = list()
 

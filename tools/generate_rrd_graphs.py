@@ -1,4 +1,4 @@
-import re
+from re import sub as re_sub
 import rrdtool
 import sqlite3
 from os import path, popen, getenv
@@ -35,7 +35,7 @@ except sqlite3.Error as error:
 
 print("Locations fetching")
 sql_locations = "SELECT DISTINCT(location) AS loc FROM air_states WHERE created > DATE('now', '-1 year') ORDER BY loc;"
-locations = [re.sub('(\s+)', '_', row[0].strip()) for row in dbh.execute(sql_locations)]
+locations = [re_sub(r"(\s+)", "_", row[0].strip()) for row in dbh.execute(sql_locations)]
 if dbh:
     dbh.close()
     print("Closed connection to SQLite DB")
