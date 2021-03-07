@@ -19,8 +19,8 @@ Below I described how to install this on Raspberry OS system.
 - Sunwait
 - some HTTP server, e.g. Lighttpd
 
-## More descriptive - for proper working IoT system you need:
-- this IoT server for grabbing and collecting IoT data in simple SQLite database.
+## More descriptive - for proper working ZeroIoT system you need:
+- this ZeroIoT server for grabbing and collecting IoT data in simple SQLite database.
 - lightweight HTTP server for serving static files like graphs with IoT metrics, e.g. Lighttpd.
 - RRDTool for storing time based series of IoT data and generating graphs mentioned above.
 
@@ -84,6 +84,7 @@ sudo systemctl start zeroiot
 sudo systemctl status zeroiot
 sudo systemctl enable zeroiot
 ```
+Try to ask ZeroIoT server: http://localhost:3000/air_state
 
 By default Gunicorn has turned off logging and this is what I expected on production environment (vitality of microSD card).
 You can observe logs from this service here:
@@ -107,7 +108,7 @@ For debugging you can send output to file, e.g: `bash -c '.... > /tmp/zeroiot.lo
 watch -n1 cat /tmp/zeroiot.log
 ```
 
-Add some data using zeroiot. For testing you can add some mocked data into crontab:
+Add some data using ZeroIoT. For testing you can add some mocked data using crontab:
 ```
 * * * * * bash -c "curl 'http://localhost:3000/insolation' -H 'Content-Type: application/vnd.api+json' --data-raw '{\"data\":{\"type\":\"insolation\",\"attributes\":{\"insolation\":`shuf -i 700-800 -n 1`,\"device\":\"esp8266_nodemcu_v2\"}}}'"
 * * * * * bash -c "curl 'http://localhost:3000/air_state' -H 'Content-Type: application/vnd.api+json' --data-raw '{\"data\":{\"type\":\"air_state\",\"attributes\":{\"temperature\":`shuf -i 18-23 -n 1`,\"humidity\":`shuf -i 40-60 -n 1`,\"device\":\"esp-01S_1\",\"location\":\"kitchen\"}}}'"
@@ -136,6 +137,7 @@ Run server in dev mode:
 ```
 FLASK_APP="app:create_app('dev')" FLASK_ENV="development" ./venv/bin/python -m flask run --port=3000
 ```
+
 
 ## API description
 
