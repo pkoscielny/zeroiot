@@ -182,6 +182,134 @@ class TestAdd:
                 ]
             ) == []
 
+    def test_wrong_param_temperature(self, client):
+        with client:
+            res = client.post(
+                '/air_state',
+                json={
+                    'data': {
+                        'type': 'air_state',
+                        'attributes': {
+                            'temperature': 'abc',
+                            'humidity': 55.5,
+                            'location': 'kitchen',
+                            'device': 'dev1_esp',
+                        },
+                    },
+                },
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid number.",
+                        'source': {
+                            'pointer': "/data/attributes/temperature",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_param_humidity(self, client):
+        with client:
+            res = client.post(
+                '/air_state',
+                json={
+                    'data': {
+                        'type': 'air_state',
+                        'attributes': {
+                            'temperature': '30.2',
+                            'humidity': 'abc',
+                            'location': 'kitchen',
+                            'device': 'dev1_esp',
+                        },
+                    },
+                },
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid number.",
+                        'source': {
+                            'pointer': "/data/attributes/humidity",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_param_location(self, client):
+        with client:
+            res = client.post(
+                '/air_state',
+                json={
+                    'data': {
+                        'type': 'air_state',
+                        'attributes': {
+                            'temperature': '30.2',
+                            'humidity': '50.4',
+                            'location': 123,
+                            'device': 'dev1_esp',
+                        },
+                    },
+                },
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/location",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_param_device(self, client):
+        with client:
+            res = client.post(
+                '/air_state',
+                json={
+                    'data': {
+                        'type': 'air_state',
+                        'attributes': {
+                            'temperature': '30.2',
+                            'humidity': '50.5',
+                            'location': 'kitchen',
+                            'device': 123,
+                        },
+                    },
+                },
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/device",
+                        },
+                    },
+                ]
+            ) == []
+
     def test_json_structure(self, client):
         with client:
             res = client.post(
@@ -375,6 +503,134 @@ class TestUpdate:
                 ]
             ) == []
 
+    def test_wrong_temperature(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': 'abc',
+                'humidity': '67.8',
+                'location': 'bathroom_2',
+                'device': 'dev5_esp',
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid number.",
+                        'source': {
+                            'pointer': "/data/attributes/temperature",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_humidity(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': 20.5,
+                'humidity': 'abc',
+                'location': 'bathroom_2',
+                'device': 'dev5_esp',
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid number.",
+                        'source': {
+                            'pointer': "/data/attributes/humidity",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_location(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': 20.5,
+                'humidity': 62.3,
+                'location': 123,
+                'device': 'dev5_esp',
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/location",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_device(self, client):
+        air_state = {
+            'id': "1",
+            'type': "air_state",
+            'attributes': {
+                'temperature': 20.5,
+                'humidity': 62.3,
+                'location': 'kitchen',
+                'device': 123,
+            },
+        }
+        with client:
+            res = client.patch(
+                '/air_state/1',
+                json={'data': air_state},
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/device",
+                        },
+                    },
+                ]
+            ) == []
+
     def test_update_temperature_and_humidity(self, client):
         air_state = {
             'id': "1",
@@ -390,6 +646,14 @@ class TestUpdate:
                 json={'data': air_state},
                 content_type='application/vnd.api+json',
             )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            air_state['id'] = '1'
+            air_state['attributes']['created'] = re_datetime
+            assert include(res_json['data'], air_state) == []
+
+            res = client.get('/air_state/1')
             assert 200 == res.status_code
 
             res_json = res.get_json()
@@ -412,6 +676,14 @@ class TestUpdate:
                 json={'data': air_state},
                 content_type='application/vnd.api+json',
             )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            air_state['id'] = '1'
+            air_state['attributes']['created'] = re_datetime
+            assert include(res_json['data'], air_state) == []
+
+            res = client.get('/air_state/1')
             assert 200 == res.status_code
 
             res_json = res.get_json()

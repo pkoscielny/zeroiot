@@ -134,6 +134,124 @@ class TestAdd:
                 ]
             ) == []
 
+    def test_wrong_device(self, client):
+        with client:
+            res = client.post(
+                '/insolation',
+                json={
+                    'data': {
+                        'type': 'insolation',
+                        'attributes': {
+                            'insolation': 123,
+                            'device': 42,
+                        },
+                    },
+                },
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid string.",
+                        'source': {
+                            'pointer': "/data/attributes/device",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_wrong_insolation_as_string(self, client):
+        with client:
+            res = client.post(
+                '/insolation',
+                json={
+                    'data': {
+                        'type': 'insolation',
+                        'attributes': {
+                            'insolation': 'foo',
+                            'device': 'dev1_esp',
+                        },
+                    },
+                },
+                content_type='application/vnd.api+json',
+            )
+            assert 422 == res.status_code
+
+            res_json = res.get_json()
+            assert include(
+                res_json['errors'],
+                [
+                    {
+                        'detail': "Not a valid integer.",
+                        'source': {
+                            'pointer': "/data/attributes/insolation",
+                        },
+                    },
+                ]
+            ) == []
+
+    def test_good_insolation_as_string(self, client):
+        insolation_1 = {
+            'type': 'insolation',
+            'attributes': {
+                'insolation': '123',
+                'device': 'dev42_esp',
+            },
+        }
+
+        with client:
+            res = client.post(
+                '/insolation',
+                json={'data': insolation_1},
+                content_type='application/vnd.api+json',
+            )
+            assert 201 == res.status_code
+
+            res_json = res.get_json()
+            insolation_1['id'] = '1'
+            insolation_1['attributes']['created'] = re_datetime
+            insolation_1['attributes']['insolation'] = 123 # string to int.
+            assert include(res_json['data'], insolation_1) == []
+
+            res = client.get('/insolation/1')
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], insolation_1) == []
+
+    def test_good_insolation_as_float(self, client):
+        insolation_1 = {
+            'type': 'insolation',
+            'attributes': {
+                'insolation': 42.42,
+                'device': 'dev42_esp',
+            },
+        }
+
+        with client:
+            res = client.post(
+                '/insolation',
+                json={'data': insolation_1},
+                content_type='application/vnd.api+json',
+            )
+            assert 201 == res.status_code
+
+            res_json = res.get_json()
+            insolation_1['id'] = '1'
+            insolation_1['attributes']['created'] = re_datetime
+            insolation_1['attributes']['insolation'] = 42 # float to int.
+            assert include(res_json['data'], insolation_1) == []
+
+            res = client.get('/insolation/1')
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], insolation_1) == []
+
     def test_add_new(self, client):
         insolation_1 = {
             'type': 'insolation',
@@ -261,6 +379,70 @@ class TestUpdate:
                 json={'data': insolation},
                 content_type='application/vnd.api+json',
             )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            insolation['id'] = '1'
+            insolation['attributes']['created'] = re_datetime
+            assert include(res_json['data'], insolation) == []
+
+            res = client.get('/insolation/1')
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], insolation) == []
+
+    def test_good_insolation_as_string(self, client):
+        insolation = {
+            'id': "1",
+            'type': "insolation",
+            'attributes': {
+                'insolation': '123',
+            },
+        }
+        with client:
+            res = client.patch(
+                '/insolation/1',
+                json={'data': insolation},
+                content_type='application/vnd.api+json',
+            )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            insolation['id'] = '1'
+            insolation['attributes']['created'] = re_datetime
+            insolation['attributes']['insolation'] = 123
+            assert include(res_json['data'], insolation) == []
+
+            res = client.get('/insolation/1')
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            assert include(res_json['data'], insolation) == []
+
+    def test_good_insolation_as_float(self, client):
+        insolation = {
+            'id': "1",
+            'type': "insolation",
+            'attributes': {
+                'insolation': 42.42,
+            },
+        }
+        with client:
+            res = client.patch(
+                '/insolation/1',
+                json={'data': insolation},
+                content_type='application/vnd.api+json',
+            )
+            assert 200 == res.status_code
+
+            res_json = res.get_json()
+            insolation['id'] = '1'
+            insolation['attributes']['created'] = re_datetime
+            insolation['attributes']['insolation'] = 42 # float to int.
+            assert include(res_json['data'], insolation) == []
+
+            res = client.get('/insolation/1')
             assert 200 == res.status_code
 
             res_json = res.get_json()
