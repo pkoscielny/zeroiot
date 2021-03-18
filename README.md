@@ -12,6 +12,20 @@ These graphs are shown in the third layer on html site served by lighttpd server
 If you have more powerful computer you can use Grafana or similar software to show nice graphs with some metrics.
 Below I described how to install this on Raspberry OS system.
 
+## Examples with real data
+
+### Last 24h
+Sunny day without clouds.
+
+![circuit](/img/full_sun_without_clouds.png)
+
+
+### Last week and last month
+You can see sunny and cloudy days.
+
+![circuit](/img/sunny_and_cloudy_days.png)
+
+
 ## Requirements:
 - Raspberry OS 
 - SQLite
